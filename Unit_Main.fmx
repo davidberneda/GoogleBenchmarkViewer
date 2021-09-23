@@ -1,0 +1,92 @@
+object FormViewer: TFormViewer
+  Left = 0
+  Top = 0
+  Caption = 'Google Benchmark Viewer'
+  ClientHeight = 480
+  ClientWidth = 869
+  Position = OwnerFormCenter
+  WindowState = wsMaximized
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  OnShow = FormShow
+  DesignerMasterStyle = 0
+  object Layout1: TLayout
+    Align = Top
+    Size.Width = 869.000000000000000000
+    Size.Height = 50.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    object ComboBoxFiles: TComboBox
+      Position.X = 16.000000000000000000
+      Position.Y = 8.000000000000000000
+      Size.Width = 255.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      OnChange = ComboBoxFilesChange
+    end
+    object ComboValue: TComboBox
+      Items.Strings = (
+        'Time'
+        'CPU')
+      ItemIndex = 0
+      Position.X = 295.000000000000000000
+      Position.Y = 8.000000000000000000
+      Size.Width = 82.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      OnChange = ComboValueChange
+    end
+    object ButtonSave: TButton
+      Position.X = 392.000000000000000000
+      Position.Y = 8.000000000000000000
+      TabOrder = 2
+      Text = 'Save...'
+      OnClick = ButtonSaveClick
+    end
+    object ShowPointers: TCheckBox
+      Position.X = 496.000000000000000000
+      Position.Y = 8.000000000000000000
+      Size.Width = 73.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      Text = '&Pointers'
+      OnChange = ShowPointersChange
+    end
+    object ShowMarks: TCheckBox
+      Position.X = 577.000000000000000000
+      Position.Y = 8.000000000000000000
+      Size.Width = 72.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 4
+      Text = '&Marks'
+      OnChange = ShowMarksChange
+    end
+    object NumericCategory: TCheckBox
+      Position.X = 648.000000000000000000
+      Position.Y = 8.000000000000000000
+      Size.Width = 105.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 5
+      Text = 'As &Numbers'
+      OnChange = NumericCategoryChange
+    end
+    object ButtonEditor: TButton
+      Position.X = 761.000000000000000000
+      Position.Y = 8.000000000000000000
+      TabOrder = 6
+      Text = '&Edit...'
+      OnClick = ButtonEditorClick
+    end
+  end
+  object SaveDialog1: TSaveDialog
+    Left = 416
+    Top = 56
+  end
+end
