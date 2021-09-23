@@ -40,53 +40,122 @@ object FormViewer: TFormViewer
       TabOrder = 1
       OnChange = ComboValueChange
     end
-    object ButtonSave: TButton
-      Position.X = 392.000000000000000000
+    object ButtonEditor: TButton
+      Position.X = 753.000000000000000000
       Position.Y = 8.000000000000000000
       TabOrder = 2
-      Text = 'Save...'
-      OnClick = ButtonSaveClick
-    end
-    object ShowPointers: TCheckBox
-      Position.X = 496.000000000000000000
-      Position.Y = 8.000000000000000000
-      Size.Width = 73.000000000000000000
-      Size.Height = 19.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 3
-      Text = '&Pointers'
-      OnChange = ShowPointersChange
-    end
-    object ShowMarks: TCheckBox
-      Position.X = 577.000000000000000000
-      Position.Y = 8.000000000000000000
-      Size.Width = 72.000000000000000000
-      Size.Height = 19.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 4
-      Text = '&Marks'
-      OnChange = ShowMarksChange
-    end
-    object NumericCategory: TCheckBox
-      Position.X = 648.000000000000000000
-      Position.Y = 8.000000000000000000
-      Size.Width = 105.000000000000000000
-      Size.Height = 19.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 5
-      Text = 'As &Numbers'
-      OnChange = NumericCategoryChange
-    end
-    object ButtonEditor: TButton
-      Position.X = 761.000000000000000000
-      Position.Y = 8.000000000000000000
-      TabOrder = 6
       Text = '&Edit...'
       OnClick = ButtonEditorClick
     end
+    object TrackZoom: TTrackBar
+      CanParentFocus = True
+      Orientation = Horizontal
+      Position.X = 457.000000000000000000
+      Position.Y = 8.000000000000000000
+      TabOrder = 3
+      OnTracking = TrackZoomTracking
+    end
+    object TextZoom: TText
+      Position.X = 565.000000000000000000
+      Position.Y = 11.000000000000000000
+      Size.Width = 52.000000000000000000
+      Size.Height = 16.000000000000000000
+      Size.PlatformDefault = False
+      Text = '0 %'
+    end
+    object Text1: TText
+      Position.X = 408.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 50.000000000000000000
+      Size.Height = 23.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Zoom:'
+    end
+    object ZoomReset: TButton
+      Enabled = False
+      Position.X = 625.000000000000000000
+      Position.Y = 8.000000000000000000
+      TabOrder = 6
+      Text = 'Reset'
+      OnClick = ZoomResetClick
+    end
   end
   object SaveDialog1: TSaveDialog
-    Left = 416
-    Top = 56
+    Left = 168
+    Top = 88
+  end
+  object MainMenu1: TMainMenu
+    Left = 64
+    Top = 88
+    object MenuFile: TMenuItem
+      Text = '&File'
+      object MenuOpenFile: TMenuItem
+        Locked = True
+        ShortCut = 114
+        Text = '&Open file...'
+        OnClick = MenuOpenFileClick
+      end
+      object MenuOpenFolder: TMenuItem
+        Locked = True
+        ShortCut = 8306
+        Text = 'Open &folder...'
+        OnClick = MenuOpenFolderClick
+      end
+      object MenuSeparator: TMenuItem
+        Locked = True
+        Text = '-'
+      end
+      object MenuSave: TMenuItem
+        Locked = True
+        Text = '&Save chart...'
+        OnClick = MenuSaveClick
+      end
+      object MenuExit: TMenuItem
+        Locked = True
+        ShortCut = 32883
+        Text = '&Exit'
+        OnClick = MenuExitClick
+      end
+    end
+    object MenuView: TMenuItem
+      Text = '&View'
+      object MenuAsNumbers: TMenuItem
+        Locked = True
+        AutoCheck = True
+        IsChecked = True
+        Text = 'As &numbers'
+        OnClick = MenuAsNumbersClick
+      end
+      object MenuMarks: TMenuItem
+        Locked = True
+        AutoCheck = True
+        Text = '&Marks'
+        OnClick = MenuMarksClick
+      end
+      object MenuPointers: TMenuItem
+        Locked = True
+        AutoCheck = True
+        Text = '&Pointers'
+        OnClick = MenuPointersClick
+      end
+      object MenuViewSeparator: TMenuItem
+        Locked = True
+        Text = '-'
+      end
+      object MenuRefresh: TMenuItem
+        Locked = True
+        ShortCut = 116
+        Text = '&Refresh'
+        OnClick = MenuRefreshClick
+      end
+    end
+    object MenuAbout: TMenuItem
+      Text = '&About...'
+      OnClick = MenuAboutClick
+    end
+  end
+  object OpenDialog1: TOpenDialog
+    Left = 56
+    Top = 160
   end
 end

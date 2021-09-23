@@ -15,6 +15,9 @@ const
   BenchmarkField_Time = 0;
   BenchmarkField_CPU = 1;
 
+procedure ClearChart(const AChart: TChart);
+procedure GetCategoryRange(const AChart: TChart; out AMin, AMax:Double);
+
 procedure LoadChart(const AChart: TChart; const AFile: String;
                     const ValueField: Integer;
                     const NumericCategory: Boolean);
@@ -29,6 +32,12 @@ uses
   FMX.Graphics,
   FMX.Surfaces,
   System.SysUtils;
+
+procedure ClearChart(const AChart: TChart);
+begin
+  AChart.FreeAllSeries;  // remove all series and data from chart
+  AChart.Title.Caption:= '';
+end;
 
 procedure LoadChart(const AChart: TChart; const AFile: String;
                     const ValueField: Integer;
@@ -57,7 +66,7 @@ procedure LoadChart(const AChart: TChart; const AFile: String;
     result.VertAxis:= TVertAxis.aBothVertAxis;
   end;
 
-  procedure AddNewValue(const ATitle, ASize: String; const AValue:Double);
+  procedure AddNewValue(const ATitle, ASize: String; const AValue: Double);
   var Series : TChartSeries;
   begin
     Series:= FindSeries(ATitle);  // BM_FillChar_CurRTL_A
@@ -71,8 +80,29 @@ procedure LoadChart(const AChart: TChart; const AFile: String;
        Series.Add(AValue, ASize);
   end;
 
+  // Example: S= FillChar/0/123
+  // Output : Name= FillChart
+  //          Category= 0/123
+  procedure SplitCategory(const S: String; out Name,Category: String);
+  var i : Integer;
+  begin
+    i:=Pos('/',S);
+
+    if i>0 then
+    begin
+      Name:=Copy(S,1,i-1);
+      Category:=Copy(S,i+1);
+    end
+    else
+    begin
+      // error ?
+      Name:=S;
+      Category:='';
+    end;
+  end;
+
   procedure ProcessCSV(const ALine: String);
-  var NameSize,
+  var Name, Category : String;
       Items : TArray<String>;
 
       Value : Double;
@@ -81,14 +111,14 @@ procedure LoadChart(const AChart: TChart; const AFile: String;
 
     // "FillChar/0";407272727;1,67494495645933;1,68805803684468;ns;0;;;;
 
-    NameSize:= Items[0].DequotedString('"').Split(['/']);   // "FillChar/0"
+    SplitCategory(Items[0].DequotedString('"'),Name,Category);   // "FillChar/0"
 
     if ValueField = BenchmarkField_Time then
        Value:= StrToFloat( Items[2] )
     else
        Value:= StrToFloat( Items[3] );
 
-    AddNewValue(NameSize[0], NameSize[1], Value);
+    AddNewValue(Name, Category, Value);
   end;
 
   procedure LoadCSV(const S:TStrings);
@@ -99,7 +129,7 @@ procedure LoadChart(const AChart: TChart; const AFile: String;
   end;
 
   procedure ProcessText(const ALine: String);
-  var NameSize,
+  var Name, Category : String;
       Items : TArray<String>;
 
       Size : String;
@@ -111,18 +141,18 @@ procedure LoadChart(const AChart: TChart; const AFile: String;
 
     if Length(Items)=6 then
     begin
-      NameSize:= Items[0].Split(['/']);   // 'BM_FillChar_CurRTL_A/0'
+      SplitCategory(Items[0], Name, Category);   // 'BM_FillChar_CurRTL_A/0'
 
       if ValueField = BenchmarkField_Time then
          Value:= StrToFloat( Items[1] )
       else
          Value:= StrToFloat( Items[3] );
 
-      AddNewValue(NameSize[0], NameSize[1], Value);
+      AddNewValue(Name, Category, Value);
     end;
   end;
 
-  procedure LoadText(const S:TStrings);
+  procedure LoadText(const S: TStrings);
   const
     Dashes = '----------';
   begin
@@ -169,7 +199,7 @@ procedure LoadChart(const AChart: TChart; const AFile: String;
   end;
 
 begin
-  AChart.FreeAllSeries;  // remove all series and data from chart
+  ClearChart(AChart);
 
   AddValues;
 
@@ -177,7 +207,7 @@ begin
 end;
 
 // Saves AChart as image into a stream.  AFormat is the extension: .png .jpg .bmp  ...
-procedure SaveChartImage(const AChart:TChart; const AStream:TStream; const AFormat:String);
+procedure SaveChartImage(const AChart: TChart; const AStream: TStream; const AFormat: String);
 var S: TBitmapSurface;
     Bitmap: TBitmap;
 begin
@@ -196,7 +226,7 @@ begin
 end;
 
 // Saves AChart as image into a file. AFile extension must be supported: .png .jpg .bmp  ...
-procedure SaveChartImage(const AChart:TChart; const AFile:String);
+procedure SaveChartImage(const AChart: TChart; const AFile: String);
 var S : TFileStream;
 begin
   S:= TFileStream.Create(AFile, fmCreate);
@@ -204,6 +234,34 @@ begin
     SaveChartImage(AChart, S, ExtractFileExt(AFile));
   finally
     S.Free;
+  end;
+end;
+
+// Returns the minimum and maximum category values for all Series in AChart
+procedure GetCategoryRange(const AChart: TChart; out AMin, AMax:Double);
+var t : Integer;
+    S : TChartSeries;
+begin
+  if AChart.SeriesCount=0 then
+  begin
+    AMax:= 0;
+    AMin:= 0;
+  end
+  else
+  begin
+    AMax:= AChart[0].MaxXValue;
+    AMin:= AChart[0].MinXValue;
+
+    for t:= 1 to AChart.SeriesCount-1 do
+    begin
+      S:= AChart[t];
+
+      if S.MaxXValue > AMax then
+         AMax:= S.MaxXValue;
+
+      if S.MinXValue < AMin then
+        AMin:= S.MinXValue;
+    end;
   end;
 end;
 

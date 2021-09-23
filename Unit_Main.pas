@@ -21,37 +21,65 @@ uses
   FMXTee.Editor.Chart,
   {$ENDIF}
 
-  FMX.ListBox, FMX.Layouts, FMX.Controls.Presentation, FMX.StdCtrls;
+  FMX.ListBox, FMX.Layouts, FMX.Controls.Presentation, FMX.StdCtrls, FMX.Menus,
+  FMX.Objects;
 
 type
   TFormViewer = class(TForm)
     Layout1: TLayout;
     ComboBoxFiles: TComboBox;
     ComboValue: TComboBox;
-    ButtonSave: TButton;
     SaveDialog1: TSaveDialog;
-    ShowPointers: TCheckBox;
-    ShowMarks: TCheckBox;
-    NumericCategory: TCheckBox;
     ButtonEditor: TButton;
+    MainMenu1: TMainMenu;
+    OpenDialog1: TOpenDialog;
+    MenuView: TMenuItem;
+    MenuRefresh: TMenuItem;
+    MenuFile: TMenuItem;
+    MenuOpenFile: TMenuItem;
+    MenuOpenFolder: TMenuItem;
+    MenuSeparator: TMenuItem;
+    MenuExit: TMenuItem;
+    MenuSave: TMenuItem;
+    MenuPointers: TMenuItem;
+    MenuMarks: TMenuItem;
+    MenuAsNumbers: TMenuItem;
+    MenuViewSeparator: TMenuItem;
+    TrackZoom: TTrackBar;
+    TextZoom: TText;
+    MenuAbout: TMenuItem;
+    Text1: TText;
+    ZoomReset: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure ComboBoxFilesChange(Sender: TObject);
     procedure ComboValueChange(Sender: TObject);
-    procedure ButtonSaveClick(Sender: TObject);
-    procedure ShowPointersChange(Sender: TObject);
-    procedure ShowMarksChange(Sender: TObject);
-    procedure NumericCategoryChange(Sender: TObject);
     procedure ButtonEditorClick(Sender: TObject);
+    procedure MenuPointersClick(Sender: TObject);
+    procedure MenuMarksClick(Sender: TObject);
+    procedure MenuAsNumbersClick(Sender: TObject);
+    procedure MenuRefreshClick(Sender: TObject);
+    procedure MenuSaveClick(Sender: TObject);
+    procedure MenuExitClick(Sender: TObject);
+    procedure MenuOpenFolderClick(Sender: TObject);
+    procedure MenuOpenFileClick(Sender: TObject);
+    procedure TrackZoomTracking(Sender: TObject);
+    procedure MenuAboutClick(Sender: TObject);
+    procedure ZoomResetClick(Sender: TObject);
   private
     { Private declarations }
 
     Chart : TChart;
+
+    LastOpened,
     ResultsPath : String;
 
     procedure ChartMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Single);
     procedure FillTextFiles(const APath:String);
     procedure RefreshChart;
+    procedure RefreshLastOpened;
+    procedure RefreshMarks;
+    procedure RefreshPointers;
   public
     { Public declarations }
   end;
@@ -112,12 +140,6 @@ begin
   {$ENDIF}
 end;
 
-procedure TFormViewer.ButtonSaveClick(Sender: TObject);
-begin
-  if SaveDialog1.Execute then
-     SaveChartImage(Chart,SaveDialog1.FileName);
-end;
-
 procedure TFormViewer.ComboBoxFilesChange(Sender: TObject);
 begin
   RefreshChart;
@@ -127,16 +149,25 @@ procedure TFormViewer.RefreshChart;
 begin
   var FileName:= TPath.Combine(ResultsPath, ComboBoxFiles.Selected.Text);
 
-  LoadChart(Chart, FileName, ComboValue.ItemIndex, NumericCategory.IsChecked);  // <-- fill chart with data
+  LoadChart(Chart, FileName, ComboValue.ItemIndex, MenuAsNumbers.IsChecked);  // <-- fill chart with data
 
   // cosmetics
   Chart.Axes.Bottom.Title.Text:= 'Size';  // <-- name of tested variation
 
-  ShowPointersChange(Self);
-  ShowMarksChange(Self);
+  RefreshPointers;
+  RefreshMarks;
+
+  TrackZoom.Value:= 0;
 end;
 
 procedure TFormViewer.FormCreate(Sender: TObject);
+
+  procedure SetupOpenDialog;
+  begin
+    OpenDialog1.Title:= 'Open Google Benchmark results file';
+    OpenDialog1.Filter:= 'Text files (*.txt)|*.txt|CSV files (*.csv)|*.csv|All files (*.txt;*.csv)|*.txt;*.csv';
+    OpenDialog1.DefaultExt:='*.csv';
+  end;
 
   procedure SetupSaveDialog;
   begin
@@ -159,6 +190,7 @@ begin
 
   Chart.OnMouseMove:= ChartMouseMove;
 
+  SetupOpenDialog;
   SetupSaveDialog;
 
   ButtonEditor.Visible:=False;
@@ -211,34 +243,165 @@ procedure TFormViewer.FormShow(Sender: TObject);
 begin
   if ParamCount>0 then
   begin
-    FillTextFiles(ParamStr(1));
-
-    // Select first file
-    if ComboBoxFiles.Count>0 then
-       ComboBoxFiles.ItemIndex:=0;
-  end;
+    LastOpened:=ParamStr(1);
+    RefreshLastOpened;
+  end
+  else
+    LastOpened:='';
 
   {$IFDEF CHARTEDITOR}
   ButtonEditor.Visible:=True;
   {$ENDIF}
 end;
 
-procedure TFormViewer.NumericCategoryChange(Sender: TObject);
+procedure TFormViewer.MenuAboutClick(Sender: TObject);
+const CRLF=#13#10#13#10;
+begin
+  ShowMessage('Usage: GoogleBenchmarkViewer.exe folder_or_file'+CRLF+CRLF+
+              'Tips:'+CRLF+
+              '       Drag mouse right button to scroll.'+CRLF+
+              'Sources:'+CRLF+
+              '        https://github.com/davidberneda/GoogleBenchmarkViewer')
+end;
+
+procedure TFormViewer.MenuAsNumbersClick(Sender: TObject);
 begin
   RefreshChart;
 end;
 
-procedure TFormViewer.ShowMarksChange(Sender: TObject);
+procedure TFormViewer.MenuExitClick(Sender: TObject);
 begin
-  for var S in Chart.SeriesList do
-      S.Marks.Visible:= ShowMarks.IsChecked;
+  Close;
 end;
 
-procedure TFormViewer.ShowPointersChange(Sender: TObject);
+procedure TFormViewer.RefreshMarks;
+begin
+  for var S in Chart.SeriesList do
+      S.Marks.Visible:= MenuMarks.IsChecked;
+end;
+
+procedure TFormViewer.MenuMarksClick(Sender: TObject);
+begin
+  RefreshMarks;
+end;
+
+procedure TFormViewer.MenuOpenFileClick(Sender: TObject);
+begin
+  if OpenDialog1.Execute then
+  begin
+    LastOpened:=OpenDialog1.FileName;
+    RefreshLastOpened;
+  end;
+end;
+
+procedure TFormViewer.MenuOpenFolderClick(Sender: TObject);
+var Current,
+    Directory : String;
+begin
+  Directory:='';
+
+  if TDirectory.Exists(LastOpened) then
+     Current:= LastOpened
+  else
+     Current:= '';
+
+  if SelectDirectory('Open folder with Google Benchmark result files',Current,Directory) then
+  begin
+    LastOpened:=Directory;
+    RefreshLastOpened;
+  end;
+end;
+
+procedure TFormViewer.RefreshPointers;
 begin
   for var S in Chart.SeriesList do
       if S is TCustomSeries then
-         TCustomSeries(S).Pointer.Visible:= ShowPointers.IsChecked;
+         TCustomSeries(S).Pointer.Visible:= MenuPointers.IsChecked;
+end;
+
+procedure TFormViewer.TrackZoomTracking(Sender: TObject);
+
+  procedure ApplyZoom(const Range: Double);
+  var CurrentMin : Double;
+  begin
+    CurrentMin:= Chart.Axes.Bottom.Minimum;
+    Chart.Axes.Bottom.SetMinMax(CurrentMin, CurrentMin+ Range)
+  end;
+
+var Zoom : Integer;
+    Range,
+    Min, Max : Double;
+begin
+  Zoom:= Round(TrackZoom.Value);
+  TextZoom.Text:= Zoom.ToString+' %';
+
+  GetCategoryRange(Chart, Min, Max);
+
+  if (Zoom>0) and (Max<>0) then
+  begin
+    Range:= (Max-Min) / ((0.01*Zoom)+1);
+    ApplyZoom(Range);
+  end
+  else
+  begin
+    Chart.UndoZoom;
+    Chart.Axes.Bottom.Automatic:= True;
+  end;
+
+  ZoomReset.Enabled:= Zoom>0;
+end;
+
+procedure TFormViewer.ZoomResetClick(Sender: TObject);
+begin
+  TrackZoom.Value:= 0;
+end;
+
+procedure TFormViewer.MenuPointersClick(Sender: TObject);
+begin
+  RefreshPointers;
+end;
+
+procedure TFormViewer.RefreshLastOpened;
+
+  function FindItem(const AText:String):Integer;
+  begin
+    for var t:= 0 to ComboBoxFiles.Count-1 do
+        if SameText(ComboBoxFiles.Items[t],AText) then
+           Exit(t);
+
+    result:= -1;
+  end;
+
+var Old : String;
+begin
+  ClearChart(Chart);
+
+  if ComboBoxFiles.Selected=nil then
+     Old:= ''
+  else
+     Old:= ComboBoxFiles.Selected.Text;
+
+  FillTextFiles(LastOpened);
+
+  // Select previous file
+  ComboBoxFiles.ItemIndex:= FindItem(Old);
+
+  // Select first file if any selected
+  if ComboBoxFiles.ItemIndex = -1 then
+     if ComboBoxFiles.Count>0 then
+        ComboBoxFiles.ItemIndex:=0;
+end;
+
+procedure TFormViewer.MenuRefreshClick(Sender: TObject);
+begin
+  if LastOpened<>'' then
+     RefreshLastOpened;
+end;
+
+procedure TFormViewer.MenuSaveClick(Sender: TObject);
+begin
+  if SaveDialog1.Execute then
+     SaveChartImage(Chart,SaveDialog1.FileName);
 end;
 
 // Show tooltips (hints)
