@@ -147,6 +147,9 @@ end;
 
 procedure TFormViewer.RefreshChart;
 begin
+  if ComboBoxFiles.Selected=nil then
+     Exit;
+
   var FileName:= TPath.Combine(ResultsPath, ComboBoxFiles.Selected.Text);
 
   LoadChart(Chart, FileName, ComboValue.ItemIndex, MenuAsNumbers.IsChecked);  // <-- fill chart with data
@@ -229,10 +232,13 @@ begin
       AddFolder(APath);
     end
     else
+    if TFile.Exists(APath) then
     begin
       ResultsPath:= TPath.GetDirectoryName(APath);
       TryAddFile(APath);
-    end;
+    end
+    else
+      ResultsPath:='';
 
   finally
     ComboBoxFiles.EndUpdate;
@@ -242,12 +248,11 @@ end;
 procedure TFormViewer.FormShow(Sender: TObject);
 begin
   if ParamCount>0 then
-  begin
-    LastOpened:=ParamStr(1);
-    RefreshLastOpened;
-  end
+     LastOpened:=ParamStr(1)
   else
-    LastOpened:='';
+     LastOpened:=TDirectory.GetCurrentDirectory;
+
+  RefreshLastOpened;
 
   {$IFDEF CHARTEDITOR}
   ButtonEditor.Visible:=True;
@@ -257,7 +262,8 @@ end;
 procedure TFormViewer.MenuAboutClick(Sender: TObject);
 const CRLF=#13#10#13#10;
 begin
-  ShowMessage('Usage: GoogleBenchmarkViewer.exe folder_or_file'+CRLF+CRLF+
+  ShowMessage('Usage: GoogleBenchmarkViewer.exe [folder or file]'+CRLF+
+              '  If no parameter is specified, the current folder is scanned.'+CRLF+CRLF+
               'Tips:'+CRLF+
               '       Drag mouse right button to scroll.'+CRLF+
               'Sources:'+CRLF+
@@ -390,6 +396,8 @@ begin
   if ComboBoxFiles.ItemIndex = -1 then
      if ComboBoxFiles.Count>0 then
         ComboBoxFiles.ItemIndex:=0;
+
+  ComboValue.Enabled:= ComboBoxFiles.ItemIndex <> -1;
 end;
 
 procedure TFormViewer.MenuRefreshClick(Sender: TObject);
