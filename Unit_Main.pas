@@ -50,6 +50,10 @@ type
     MenuAbout: TMenuItem;
     Text1: TText;
     ZoomReset: TButton;
+    MenuLogarithmic: TMenuItem;
+    MenuStyle: TMenuItem;
+    MenuLine: TMenuItem;
+    MenuBar: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure ComboBoxFilesChange(Sender: TObject);
@@ -66,6 +70,9 @@ type
     procedure TrackZoomTracking(Sender: TObject);
     procedure MenuAboutClick(Sender: TObject);
     procedure ZoomResetClick(Sender: TObject);
+    procedure MenuLogarithmicClick(Sender: TObject);
+    procedure MenuLineClick(Sender: TObject);
+    procedure MenuBarClick(Sender: TObject);
   private
     { Private declarations }
 
@@ -275,9 +282,31 @@ begin
   RefreshChart;
 end;
 
+procedure TFormViewer.MenuBarClick(Sender: TObject);
+begin
+  MenuLine.IsChecked:= False;
+
+  if MenuBar.IsChecked then
+     ChangeAllSeriesType(Chart, TBarSeries);
+end;
+
 procedure TFormViewer.MenuExitClick(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TFormViewer.MenuLineClick(Sender: TObject);
+begin
+  MenuBar.IsChecked:= False;
+
+  if MenuLine.IsChecked then
+     ChangeAllSeriesType(Chart, TLineSeries);
+end;
+
+procedure TFormViewer.MenuLogarithmicClick(Sender: TObject);
+begin
+  Chart.Axes.Left.Logarithmic:= MenuLogarithmic.IsChecked;
+  Chart.Axes.Right.Logarithmic:= MenuLogarithmic.IsChecked;
 end;
 
 procedure TFormViewer.RefreshMarks;

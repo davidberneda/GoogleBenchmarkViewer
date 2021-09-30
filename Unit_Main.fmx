@@ -126,6 +126,12 @@ object FormViewer: TFormViewer
         Text = 'As &numbers'
         OnClick = MenuAsNumbersClick
       end
+      object MenuLogarithmic: TMenuItem
+        Locked = True
+        AutoCheck = True
+        Text = '&Logarithmic'
+        OnClick = MenuLogarithmicClick
+      end
       object MenuMarks: TMenuItem
         Locked = True
         AutoCheck = True
@@ -137,6 +143,25 @@ object FormViewer: TFormViewer
         AutoCheck = True
         Text = '&Pointers'
         OnClick = MenuPointersClick
+      end
+      object MenuStyle: TMenuItem
+        Locked = True
+        Text = '&Style'
+        object MenuBar: TMenuItem
+          Locked = True
+          AutoCheck = True
+          RadioItem = True
+          Text = '&Bar'
+          OnClick = MenuBarClick
+        end
+        object MenuLine: TMenuItem
+          Locked = True
+          AutoCheck = True
+          RadioItem = True
+          IsChecked = True
+          Text = '&Line'
+          OnClick = MenuLineClick
+        end
       end
       object MenuViewSeparator: TMenuItem
         Locked = True
