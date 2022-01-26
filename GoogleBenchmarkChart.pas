@@ -64,6 +64,10 @@ procedure LoadChart(const AChart: TChart; const AFile: String;
     result.Marks.Transparent:= True;
 
     result.VertAxis:= TVertAxis.aBothVertAxis;
+
+    // Do not use line width to expand axes, as when moving the mouse over a Series
+    // its width is changed.
+    (result as TCustomSeries).InflateMargins:= False;
   end;
 
   procedure AddNewValue(const ATitle, ASize: String; const AValue: Double);

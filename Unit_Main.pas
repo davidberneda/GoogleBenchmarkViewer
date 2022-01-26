@@ -453,6 +453,12 @@ begin
      Chart.Hint:=''
   else
      Chart.Hint:= S.YValue[Index].ToString;
+
+  for var Series in Chart.SeriesList do
+      if Series=S then
+         Series.Pen.Width:= 3
+      else
+         Series.Pen.Width:= 1
 end;
 
 end.
