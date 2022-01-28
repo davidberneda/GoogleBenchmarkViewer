@@ -31,6 +31,7 @@ uses
   System.IOUtils,
   FMX.Graphics,
   FMX.Surfaces,
+  System.UITypes,
   System.SysUtils;
 
 procedure ClearChart(const AChart: TChart);
@@ -64,6 +65,11 @@ procedure LoadChart(const AChart: TChart; const AFile: String;
     result.Marks.Transparent:= True;
 
     result.VertAxis:= TVertAxis.aBothVertAxis;
+
+    result.Cursor:= crHandPoint;
+
+    // Allow more pixels to consider the mouse cursor over a line
+    (result as TCustomSeries).ClickTolerance:= 3;
 
     // Do not use line width to expand axes, as when moving the mouse over a Series
     // its width is changed.
