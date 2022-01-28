@@ -447,12 +447,25 @@ procedure TFormViewer.ChartMouseMove(Sender: TObject; Shift: TShiftState; X,
 var Index : Integer;
     S : TChartSeries;
 begin
+
+  // Is the mouse over a line series ?
   S:= Chart.SeriesList.Clicked(Round(X), Round(Y), Index);
 
   if S=nil then
      Chart.Hint:=''
   else
      Chart.Hint:= S.YValue[Index].ToString;
+
+  if S=nil then
+  begin
+
+    // Is the mouse over a line series text at Chart Legend ?
+    Index:= Chart.Legend.Clicked(Round(X),Round(Y));
+
+    if Index <> -1 then
+       S:= Chart[Index];
+
+  end;
 
   for var Series in Chart.SeriesList do
       if Series=S then
